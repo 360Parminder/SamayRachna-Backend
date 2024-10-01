@@ -56,6 +56,38 @@ const registerUser = async (req, res) => {
     }
   
   };
+  const loginUser = async (req, res) => {
+    const { userEmail, password } = req.body;
+    try {
+      const user = await User.findOne({ email: userEmail });
+      if (!user) {
+        return {
+          status: 400,
+          message: "User not found",
+        };
+      }
+      const isPasswordMatched = await bcrypt.compare(password, user.password);
+      if (!isPasswordMatched) {
+        return {
+          status: 400,
+          message: "Password is incorrect",
+        };
+      }
+      const token = generateToken(user._id);
+      return {
+        status: 200,
+        success: true,
+        message: "User logged in",
+        token,
+      };
+    } catch (error) {
+      console.log("login error", error);
+      return {
+        status: 400,
+        message: error.message,
+      };
+    }
+  };
 
 module.exports = {
     registerUser
