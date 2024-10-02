@@ -88,7 +88,33 @@ const registerUser = async (req, res) => {
       };
     }
   };
+  const userProfile = async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        return {
+          status: 400,
+          message: "User not found",
+        };
+      }
+      return {
+        status: 200,
+        success: true,
+        message: "User profile fetched",
+        user,
+      };
+    } catch (error) {
+      console.log("profile error", error);
+      return {
+        status: 400,
+        message: error.message,
+      };
+    }
+  };
 
 module.exports = {
-    registerUser
-};
+    registerUser,
+    loginUser,
+    userProfile
+  };
