@@ -112,6 +112,16 @@ const registerUser = async (req, res) => {
       };
     }
   };
+  const generateToken = (userId) => {
+    const payload = {
+      userId,
+    };
+    const options = {
+      expiresIn: "1h",
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, options);
+    return token;
+  };
 
 module.exports = {
     registerUser,
