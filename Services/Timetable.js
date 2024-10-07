@@ -13,9 +13,8 @@ const configureTimetableAndGenerate = async(req, res) => {
       maxLecturesPerWeekPerTeacher,
       teachers
     } = req.body;
-//   console.log(teachers);
-  
-    // Validate input data
+
+    // Check if all the required fields are present in the request body
     if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0) {
       return res.status(400).json({ message: "Invalid input data" });
     }

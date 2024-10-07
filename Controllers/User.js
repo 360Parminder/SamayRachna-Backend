@@ -1,5 +1,5 @@
 
-const { registerUser } = require("../Services/User");
+const { registerUser, loginUser, userProfile } = require("../Services/User");
 
 // Register a new user
 const RegisterUser = async (req, res) => {
