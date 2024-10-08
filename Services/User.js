@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const registerUser = async (req, res) => {
     const { userName, userEmail, password } = req.body;
     try {
-      const userExists = await User.findOne({ userEmail });
+      const userExists = await User.findOne({ email:userEmail });
       if (userExists) {
         console.log("userexists", userExists);
         return{
@@ -90,8 +90,10 @@ const registerUser = async (req, res) => {
   };
   const userProfile = async (req, res) => {
     const { userId } = req.params;
+    console.log("userid", userId);
+    
     try {
-      const user = await User.findById(userId);
+      const user = await User.findById({id:userId});
       if (!user) {
         return {
           status: 400,
