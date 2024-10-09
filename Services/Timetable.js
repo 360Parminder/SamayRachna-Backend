@@ -1,10 +1,9 @@
 const { generateTimetable } = require("../Utils/genrateTimetable");
+const User = require("../Schema/UserSchema");
 
 
-
-const configureTimetableAndGenerate = async(req, res) => {
-    console.log("from service",req.body);
-    
+const configureTimetableAndGenerate = async(req, res) => { 
+  const user = req.user
     const {
       workingDays,
       lecturesPerDay,
@@ -29,13 +28,25 @@ const configureTimetableAndGenerate = async(req, res) => {
       totalTeachers
 
     );
-  
-    // Respond with the generated timetable
-    return {
-        success: true,
-      message: "Timetable generated successfully",
-      timetable: generatedTimetable
-    };
+    if (generateTimetable) {
+        const currentUser = await User.findById({_id:user._id});
+        if (!currentUser) {
+            return {
+              status: 400,
+              message: "User not found",
+            };
+          }
+       
+        const userTimetable = await User.findByIdAndUpdate({_id:user._id},{
+            timetabe:generatedTimetable
+        })
+        return {
+            success: true,
+          message: "Timetable generated successfully",
+          timetable: userTimetable
+        };
+    }
+    
   };
   
   module.exports={

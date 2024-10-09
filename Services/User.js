@@ -3,6 +3,7 @@ const User  = require("../Schema/UserSchema");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require('uuid');
+const generateTokens = require("../Utils/genrateTokens");
 
 // Register a new user
 const registerUser = async (req, res) => {
@@ -23,7 +24,7 @@ const registerUser = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
   
       const user = await User.create({
-        id: uuidv4(),
+        userId: uuidv4(),
         name:userName,
         email:userEmail,
         password: hashedPassword,
@@ -36,7 +37,7 @@ const registerUser = async (req, res) => {
           status: 201,
           success: true,
           message:"User Registered",
-          _id: user._id,
+          userId: user.userId,
           name: user.name,
           email: user.email,
           // token: generateToken(user._id),
@@ -73,12 +74,12 @@ const registerUser = async (req, res) => {
           message: "Password is incorrect",
         };
       }
-      const token = generateToken(user._id);
+      const { accessToken,refreshToken} = await generateTokens(user)
       return {
         status: 200,
         success: true,
         message: "User logged in",
-        token,
+        accessToken
       };
     } catch (error) {
       console.log("login error", error);
@@ -89,12 +90,10 @@ const registerUser = async (req, res) => {
     }
   };
   const userProfile = async (req, res) => {
-    const { userId } = req.params;
-    console.log("userid", userId);
-    
+    const user =req.user  
     try {
-      const user = await User.findById({id:userId});
-      if (!user) {
+      const currentUser = await User.findById({_id:user._id});
+      if (!currentUser) {
         return {
           status: 400,
           message: "User not found",
@@ -104,7 +103,7 @@ const registerUser = async (req, res) => {
         status: 200,
         success: true,
         message: "User profile fetched",
-        user,
+        currentUser,
       };
     } catch (error) {
       console.log("profile error", error);
@@ -113,16 +112,6 @@ const registerUser = async (req, res) => {
         message: error.message,
       };
     }
-  };
-  const generateToken = (userId) => {
-    const payload = {
-      userId,
-    };
-    const options = {
-      expiresIn: "1h",
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, options);
-    return token;
   };
 
 module.exports = {

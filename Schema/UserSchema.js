@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 
 const UserSchema = new mongoose.Schema({
-    id: {
+    userId: {
         type: String,
         required: true,
         unique: true
@@ -23,6 +23,18 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    myTimeTable:{
+        type:Array,
+        default:[]
+    },
+    timetabe:{
+        type:Array,
+        default:[]
+    },
+    refreshToken:{
+        type:String,
+        required:true
     },
     createdAt: {
         type: Date,
