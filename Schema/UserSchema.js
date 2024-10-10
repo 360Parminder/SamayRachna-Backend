@@ -28,13 +28,13 @@ const UserSchema = new mongoose.Schema({
         type:Array,
         default:[]
     },
-    timetabe:{
+    timetable:{
         type:Array,
         default:[]
     },
     refreshToken:{
         type:String,
-        required:true
+        // required:true
     },
     createdAt: {
         type: Date,
