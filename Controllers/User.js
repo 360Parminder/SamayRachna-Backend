@@ -1,5 +1,5 @@
 
-const { registerUser, loginUser, userProfile } = require("../Services/User");
+const { registerUser, loginUser, userProfile, getallUser } = require("../Services/User");
 
 // Register a new user
 const RegisterUser = async (req, res) => {
@@ -29,8 +29,18 @@ const UserProfile = async (req, res) => {
         res.status(400).json(data);
     }
 };
+const GetAllUser = async (req, res) => {
+    const data = await getallUser(req, res);
+    if (data.success) {
+        res.status(200).json(data);
+    }
+    else {
+        res.status(400).json(data);
+    }
+};
 module.exports = {
     RegisterUser,
     LoginUser,
-    UserProfile
+    UserProfile,
+    GetAllUser
 };

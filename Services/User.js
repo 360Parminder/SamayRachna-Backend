@@ -22,6 +22,230 @@ const registerUser = async (req, res) => {
   
       // const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, 10);
+      const userTimetable = [
+        [
+            {
+                "day": 1,
+                "lecture": 1,
+                
+                "subject": "English",
+            
+            },
+            {
+                "day": 1,
+                "lecture": 2,
+               
+                "subject": "Geography",
+                
+            },
+            {
+                "day": 1,
+                "lecture": 3,
+              
+                "subject": "Physics",
+               
+            },
+            {
+                "day": 1,
+                "lecture": 4,
+               
+                "subject": "History",
+                
+            },
+            {
+                "day": 1,
+                "lecture": 5,
+               
+                "subject": "Geography",
+                
+            }
+        ],
+        [
+            {
+                "day": 2,
+                "lecture": 1,
+                
+                "subject": "Biology",
+               
+            },
+            {
+                "day": 2,
+                "lecture": 2,
+              
+                "subject": "English",
+               
+            },
+            {
+                "day": 2,
+                "lecture": 3,
+                
+                "subject": "Biology",
+               
+            },
+            {
+                "day": 2,
+                "lecture": 4,
+               
+                "subject": "Physics",
+               
+            },
+            {
+                "day": 2,
+                "lecture": 5,
+               
+                "subject": "History",
+                
+            }
+        ],
+        [
+            {
+                "day": 3,
+                "lecture": 1,
+              
+                "subject": "English",
+               
+            },
+            {
+                "day": 3,
+                "lecture": 2,
+              
+                "subject": "Art",
+               
+            },
+            {
+                "day": 3,
+                "lecture": 3,
+              
+                "subject": "Math",
+               
+            },
+            {
+                "day": 3,
+                "lecture": 4,
+                
+                "subject": "Biology",
+               
+            },
+            {
+                "day": 3,
+                "lecture": 5,
+              
+                "subject": "Art",
+               
+            }
+        ],
+        [
+            {
+                "day": 4,
+                "lecture": 1,
+                
+                "subject": "Biology",
+               
+            },
+            {
+                "day": 4,
+                "lecture": 2,
+              
+                "subject": "Art",
+               
+            },
+            {
+                "day": 4,
+                "lecture": 3,
+               
+                "subject": "Geography",
+                
+            },
+            {
+                "day": 4,
+                "lecture": 4,
+              
+                "subject": "Physics",
+               
+            },
+            {
+                "day": 4,
+                "lecture": 5,
+              
+                "subject": "Math",
+               
+            }
+        ],
+        [
+            {
+                "day": 5,
+                "lecture": 1,
+              
+                "subject": "Art",
+               
+            },
+            {
+                "day": 5,
+                "lecture": 2,
+               
+                "subject": "History",
+                
+            },
+            {
+                "day": 5,
+                "lecture": 3,
+               
+                "subject": "Geography",
+                
+            },
+            {
+                "day": 5,
+                "lecture": 4,
+              
+                "subject": "Math",
+               
+            },
+            {
+                "day": 5,
+                "lecture": 5,
+              
+                "subject": "Art",
+               
+            }
+        ],
+        [
+            {
+                "day": 6,
+                "lecture": 1,
+               
+                "subject": "Geography",
+                
+            },
+            {
+                "day": 6,
+                "lecture": 2,
+                
+                "subject": "Chemistry",
+               
+            },
+            {
+                "day": 6,
+                "lecture": 3,
+              
+                "subject": "Math",
+               
+            },
+            {
+                "day": 6,
+                "lecture": 4,
+              
+                "subject": "Math",
+               
+            },
+            {
+                "day": 6,
+                "lecture": 5,
+              
+                "subject": "Art",
+               
+            }
+        ]
+    ]
   
       const user = await User.create({
         userId: uuidv4(),
@@ -29,6 +253,7 @@ const registerUser = async (req, res) => {
         email:userEmail,
         password: hashedPassword,
         isAdmin: false,
+        myTimeTable:userTimetable
       });
   
       if (user) {
@@ -91,8 +316,10 @@ const registerUser = async (req, res) => {
   };
   const userProfile = async (req, res) => {
     const user =req.user  
+    console.log(user);
+    
     try {
-      const currentUser = await User.findById({_id:user._id});
+      const currentUser = await User.findOne({userId:user.userId});
       if (!currentUser) {
         return {
           status: 400,
@@ -113,9 +340,34 @@ const registerUser = async (req, res) => {
       };
     }
   };
+const getallUser = async(req,res)=>{
+  try {
+    const user = await User.find({}).select("-password -auth_key -myTimeTable -updatedAt -createdAt -refreshToken -timetable -__v");
+    if (!user) {
+      return {
+        status: 400,
+        message: "User not found",
+      };
+    }
+    return {
+      status: 200,
+      success: true,
+      message: "User profile fetched",
+      user,
+    };
+    
+  } catch (error) {
+      console.log("profile error", error);
+      return {
+        status: 400,
+        message: error.message,
+      };
+  }
+}
 
 module.exports = {
     registerUser,
     loginUser,
-    userProfile
+    userProfile,
+    getallUser
   };

@@ -86,7 +86,8 @@ function generateTimetable(workingDays,
                             day: day + 1,
                             lecture: lecture + 1,
                             teacher: teacher.teacherName,
-                            subject: subject
+                            subject: subject,
+                            userId:teacher.userId
                         };
 
                         // Update the teacher's lecture count
