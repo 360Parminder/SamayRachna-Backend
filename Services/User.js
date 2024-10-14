@@ -315,11 +315,10 @@ const registerUser = async (req, res) => {
     }
   };
   const userProfile = async (req, res) => {
-    const user =req.user  
-    console.log(user);
+    const user =req.user
     
     try {
-      const currentUser = await User.findOne({userId:user.userId});
+      const currentUser = await User.findOne({userId:user.userId}).select("-password, -refreshToken");
       if (!currentUser) {
         return {
           status: 400,
