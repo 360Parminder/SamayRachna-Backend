@@ -5,13 +5,10 @@ const jwt = require("jsonwebtoken");
  
  
  const generateTokens = async (user) => {
+
     try {
-      const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
-      // const hashaccessToken = await bcrypt.hash(accessToken, 10)
-      const refreshToken = jwt.sign({ id: user._id },process.env.REFRESH_TOKEN_SECRET)
-      // const hashrefreshToken = await bcrypt.hash(refreshToken, 10)
-      user.refreshToken = refreshToken
-      await user.save({ validateBeforeSave: false })
+      const accessToken = jwt.sign({ id: user.userid }, process.env.JWT_SECRET)
+      const refreshToken = jwt.sign({ id: user.userid },process.env.REFRESH_TOKEN_SECRET)
       return {
         accessToken,
         refreshToken
