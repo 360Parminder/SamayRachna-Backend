@@ -9,7 +9,7 @@ const { query } = require("express");
 
 // Register a new user
 const registerUser = async (req, res) => {
-  const { userName, userEmail, password } = req.body;
+  const { userName, userEmail, password,role,phone } = req.body;
   try {
 
     // Check if user already exists
@@ -22,9 +22,9 @@ const registerUser = async (req, res) => {
       }
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userQuery = `INSERT INTO users (userid, name, email, password, isadmin)
-                   VALUES ('${uuidv4()}', '${userName}', '${userEmail}', '${hashedPassword}', false)
-                   RETURNING userid, name, email;`;
+    const userQuery = `INSERT INTO users (userid, name, email, password, isadmin,role ,mobile)
+                   VALUES ('${uuidv4()}', '${userName}', '${userEmail}', '${hashedPassword}', false,'${role?role:"teacher"}',${phone})
+                   RETURNING name, email,mobile,role;`;
     const result = await client.query(userQuery);
     console.log(result.rows[0]);
 
@@ -47,9 +47,11 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   const { userEmail, password } = req.body;
+  
   try {
-    const user = await client.query(`SELECT * FROM users WHERE email = '${userEmail}';`);
-    if (!user) {
+    const user = await client.query(`SELECT * FROM users WHERE email = '${userEmail}'`);
+    
+    if (user.rows.length === 0) {
       return {
         status: 400,
         message: "User not found",
@@ -81,7 +83,7 @@ const userProfile = async (req, res) => {
   const user = req.user
 
   try {
-    const currentUser = await User.findOne({ userId: user.userId }).select("-password, -refreshToken");
+    const currentUser = await user
     if (!currentUser) {
       return {
         status: 400,
