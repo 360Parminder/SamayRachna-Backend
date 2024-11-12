@@ -106,8 +106,8 @@ const userProfile = async (req, res) => {
 };
 const getallUser = async (req, res) => {
   try {
-    const user = await User.find({}).select("-password -auth_key -myTimeTable -updatedAt -createdAt -refreshToken -timetable -__v");
-    if (!user) {
+    const user = await client.query(`SELECT * FROM users`);
+    if (user.rows.length === 0) {
       return {
         status: 400,
         message: "User not found",
@@ -117,7 +117,7 @@ const getallUser = async (req, res) => {
       status: 200,
       success: true,
       message: "User profile fetched",
-      user,
+      users:user.rows[0],
     };
 
   } catch (error) {

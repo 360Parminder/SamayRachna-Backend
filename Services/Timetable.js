@@ -1,6 +1,7 @@
 const { generateTimetable } = require("../Utils/genrateTimetable");
 const User = require("../Schema/UserSchema");
 const { publishTimetable } = require("../Utils/publishTimeTable");
+const client = require("../db/databasepg");
 
 
 const configureTimetableAndGenerate = async (req, res) => {
@@ -17,7 +18,7 @@ const configureTimetableAndGenerate = async (req, res) => {
 
     // Check if all the required fields are present in the request body
     if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0) {
-      return{ message: "Invalid input data" };
+      return { message: "Invalid input data" };
     }
 
     // Generate the timetable using the function
@@ -31,70 +32,75 @@ const configureTimetableAndGenerate = async (req, res) => {
     );
 
     if (!generatedTimetable) {
-      return{
+      return {
         success: false,
         message: "Error generating timetable"
       }
     }
 
-    const currentUser = await User.findByIdAndUpdate(user._id);
-    if (!currentUser) {
-      return{
+    const newTimetable = await client.query(
+      `UPDATE users SET timetable = $1 WHERE email = $2 RETURNING (timetable)`,
+      [generatedTimetable, user.email]
+    );
+    console.log(newTimetable.rows[0]);
+
+    if (!newTimetable.rows[0]) {
+      return {
         success: false,
         message: "User not found"
       }
     }
-
-    currentUser.timetable.push(generatedTimetable);
-    await currentUser.save();
-
-    return{
+    return {
       success: true,
       message: "Timetable generated and saved successfully",
-      timetable:generatedTimetable, // Return the updated timetable array
+      timetable: generatedTimetable, 
     };
 
   } catch (error) {
-    return { message: "Server error", error: error.message };
+    return {
+      success: false,
+      message: "Server error",
+      error: error.message
+    };
   }
 };
-const publishTimeTable = async(req,res)=>{
-    const {timetable} = req.body;
-    // console.log(timetable);
-    
-    if (!timetable) {
-      return{
-        success:false,
-        message:"unable to get Timetable"
-      }
+const publishTimeTable = async (req, res) => {
+  const { timetable } = req.body;
+  // console.log(timetable);
+
+  if (!timetable) {
+    return {
+      success: false,
+      message: "unable to get Timetable"
     }
-   try {
+  }
+  try {
     const resp = await publishTimetable(timetable)
     if (resp.success) {
-        return{
-          success:true,
-          message:"TimeTable Publised"
-        }
-    }
-    else {
-      return{
-        success:false,
-        message:"unable to publish Timetable"
+      return {
+        success: true,
+        message: "TimeTable Publised"
       }
     }
-    
-   } catch (error) {
-    console.log(error);
-    return{
-      success:false,
-      message:"unable to publish Timetable"
+    else {
+      return {
+        success: false,
+        message: "unable to publish Timetable"
+      }
     }
-    
-   }
-    
-}
-  
-  module.exports={
-    configureTimetableAndGenerate,
-    publishTimeTable
+
+  } catch (error) {
+    console.log(error);
+    return {
+      success: false,
+      message: "unable to publish Timetable"
+    }
+
   }
+
+}
+
+module.exports = {
+  configureTimetableAndGenerate,
+  publishTimeTable
+}

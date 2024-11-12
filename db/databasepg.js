@@ -1,14 +1,14 @@
-// const {Client} = require('pg');
+const {Client} = require('pg');
 
 
-// const client = new Client({
-//     host: 'localhost',
-//     user:'postgres',
-//     port: 5432,
-//     password: 'Yadav@123',
-//     database: 'serene_bhaskara',
-//     connectionTimeoutMillis: 5000  // Set a 5-second timeout
-// });
+const client = new Client({
+    host: 'localhost',
+    user:'postgres',
+    port: 5432,
+    password: 'Yadav@123',
+    database: 'serene_bhaskara',
+    connectionTimeoutMillis: 5000  // Set a 5-second timeout
+});
 
 // // client.connect();
 
@@ -26,15 +26,15 @@
 // //     client.end();
 // // });
 
-// module.exports = client;
+module.exports = client;
 
 
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
 
 
-const prisma = new PrismaClient({
-    log: ['query', 'info', 'warn'],
-    errorFormat: 'pretty ,colorless',   
-});
+// const prisma = new PrismaClient({
+//     log: ['query', 'info', 'warn'],
+//     errorFormat: 'pretty ,colorless',   
+// });
 
-export default prisma;
+// export default prisma;
