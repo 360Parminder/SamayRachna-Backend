@@ -66,7 +66,7 @@ const configureTimetableAndGenerate = async (req, res) => {
 };
 const publishTimeTable = async (req, res) => {
   const { timetable } = req.body;
-  // console.log(timetable);
+  console.log(timetable);
 
   if (!timetable) {
     return {
