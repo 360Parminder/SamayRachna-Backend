@@ -1,7 +1,7 @@
 const { generateTimetable } = require("../Utils/genrateTimetable");
 const User = require("../Schema/UserSchema");
 const { publishTimetable } = require("../Utils/publishTimeTable");
-const client = require("../db/databasepg");
+const { prisma } = require("../db/connectDB");
 
 
 const configureTimetableAndGenerate = async (req, res) => {
@@ -13,15 +13,17 @@ const configureTimetableAndGenerate = async (req, res) => {
       totalTeachers,
       maxLecturesPerDayPerTeacher,
       maxLecturesPerWeekPerTeacher,
-      teachers
+      teachers,
+      timetableName, // Name of the timetable from the request body
     } = req.body;
 
-    // Check if all the required fields are present in the request body
-    if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0) {
-      return { message: "Invalid input data" };
+    if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0 || !timetableName) {
+      return{
+        success: false,
+        message: "Please provide all required fields",
+      }
     }
 
-    // Generate the timetable using the function
     const generatedTimetable = await generateTimetable(
       workingDays,
       lecturesPerDay,
@@ -30,38 +32,40 @@ const configureTimetableAndGenerate = async (req, res) => {
       maxLecturesPerWeekPerTeacher,
       totalTeachers
     );
+    console.log("Generated Timetable:", generatedTimetable);
+    
 
     if (!generatedTimetable) {
-      return {
+      return{
         success: false,
-        message: "Error generating timetable"
+        message: "Unable to generate timetable",
       }
     }
 
-    const newTimetable = await client.query(
-      `UPDATE users SET timetable = $1 WHERE email = $2 RETURNING (timetable)`,
-      [generatedTimetable, user.email]
-    );
-    console.log(newTimetable.rows[0]);
+    // Save timetable metadata to the database
+    const savedTimetableMetadata = await prisma.timetable.create({
+      data: {
+        name: timetableName,
+        userId: user.userid,
+        timetable: generatedTimetable, // Save the timetable as a JSON object
+        status: false, // Default status is "not in use"
+      },
+    });
+    console.log("Timetable Metadata:", savedTimetableMetadata);
+    
 
-    if (!newTimetable.rows[0]) {
-      return {
-        success: false,
-        message: "User not found"
-      }
-    }
-    return {
+    return{
       success: true,
-      message: "Timetable generated and saved successfully",
-      timetable: generatedTimetable, 
-    };
-
+      message: "Timetable generated successfully",
+      timetable: savedTimetableMetadata,
+    }
   } catch (error) {
-    return {
+    console.error("Error:", error.message);
+    return res.status(500).json({
       success: false,
       message: "Server error",
-      error: error.message
-    };
+      error: error.message,
+    });
   }
 };
 const publishTimeTable = async (req, res) => {

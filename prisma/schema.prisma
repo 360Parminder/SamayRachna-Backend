@@ -9,28 +9,50 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  userid    String   @id
   name      String?
+  email     String   @unique
+  mobile    String   @unique
   password  String
+  isadmin   Boolean  @default(false)
+  role      String   @default("teacher")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  phone     String? @unique
-  accessToken String?
-  posts     Post[]   @relation("UserPosts")
+  // posts     Post[]
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation("UserPosts", fields: [authorId], references: [id])
-  authorId  String
+// model Post {
+//   id        String   @id @default(cuid())
+//   title     String
+//   content   String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   author    User     @relation(fields: [authorId], references: [id])
+//   authorId  String
+// }
+
+// model Session {
+//   id        String   @id @default(cuid())
+//   token     String   @unique
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+// }
+
+model timetable {
+  id           Int       @id @default(autoincrement())
+  name         String
+  userId       String
+  timetable    Json      // Storing the timetable as a JSON object
+  createdAt    DateTime  @default(now())
+  status       Boolean   @default(false) // Indicates if the timetable is currently in use
 }
+
+

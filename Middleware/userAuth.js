@@ -2,6 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const user_model = require("../Schema/UserSchema");
 const client = require("../db/databasepg");
+const { prisma } = require("../db/connectDB");
 
 // Middleware for handling auth
 async function user_auth(req, res, next) {
@@ -24,13 +25,17 @@ async function user_auth(req, res, next) {
 
     const jwtPassword = process.env.JWT_SECRET;
     const decode = await jwt.verify(token, jwtPassword);
-    let user = await client.query(`SELECT * FROM users WHERE userid = '${decode.id}';`);  
+    let user = await prisma.user.findUnique({
+      where: { userid: decode.id },
+    });  
+    console.log(user);
+    
     if (!user) return res.status(404).json({ 
       message: "User not found",
       success: false,
      });
 
-    req.user = user.rows[0];
+    req.user = user;
     next();
   } catch (error) {
     return res.status(500).json({
