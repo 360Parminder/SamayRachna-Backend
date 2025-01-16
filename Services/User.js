@@ -10,7 +10,7 @@ const { prisma } = require("../db/connectDB");
 
 // Register a new user
 const registerUser = async (req, res) => {
-  const { name, email, password, role, mobile } = req.body;
+  const { name, email, password, role, mobile,department,mySubjects } = req.body;
 
   try {
     // Check if all required fields are provided
@@ -45,6 +45,9 @@ const registerUser = async (req, res) => {
         isadmin: false,
         role: role || "teacher", // Default to "teacher" if role is not provided
         mobile: mobile,
+        department: department|| "Management", // Default to "Management" if department is not provided
+        mySubjects: mySubjects,
+
       },
     });
 
@@ -159,7 +162,7 @@ const getallUser = async (req, res) => {
       status: 200,
       success: true,
       message: "Users fetched",
-      users,
+      allTeachers:users,
       totalPages: Math.ceil(totalUsers / limit),
     };
   } catch (error) {
