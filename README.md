@@ -34,7 +34,7 @@ This project is a comprehensive Time Table Management System designed to streaml
 
 ### Technology Stack
 
-- **Frontend:** React, Tailwind CSS
+- **Frontend:** React Native
 - **Backend:** Node.js, Express.js
 - **Database:** PostgreSQL, Prisma ORM
 - **Notifications:** Integration with email and SMS APIs

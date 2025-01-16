@@ -97,10 +97,11 @@ const userProfile = async (req, res) => {
     const userId = req.user?.userid; // Adjust according to how the user ID is stored
 
     if (!userId) {
-      return res.status(401).json({
+      return {
         success: false,
-        message: "Unauthorized access",
-      });
+        status: 400,
+        message: "User not found",
+      }
     }
 
     // Fetch user details from the database
@@ -116,25 +117,26 @@ const userProfile = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({
+      return {
         success: false,
+        status: 400,
         message: "User not found",
-      });
+      }
     }
 
     // Return user profile
-    return res.status(200).json({
+    return {
+      status: 200,
       success: true,
-      message: "User profile fetched successfully",
+      message: "User profile fetched",
       user,
-    });
+    }
   } catch (error) {
     console.error("Profile Error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return{
+      status: 400,
+      message: error.message,
+    }
   }
 };
 
@@ -144,6 +146,13 @@ const getallUser = async (req, res) => {
     const users = await prisma.user.findMany({
       skip: (page - 1) * limit,
       take: Number(limit),
+      select:{
+        userid: true,
+        name: true,
+        role: true,
+        department: true,
+        mySubjects: true,
+      }
     });
     const totalUsers = await prisma.user.count();
     return {
