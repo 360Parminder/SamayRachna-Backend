@@ -19,6 +19,7 @@ const configureTimetableAndGenerate = async (req, res) => {
 
     if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0 || !timetableName) {
       return{
+        status: 400,
         success: false,
         message: "Please provide all required fields",
       }
@@ -32,11 +33,9 @@ const configureTimetableAndGenerate = async (req, res) => {
       maxLecturesPerWeekPerTeacher,
       totalTeachers
     );
-    console.log("Generated Timetable:", generatedTimetable);
-    
-
     if (!generatedTimetable) {
       return{
+        status: 500,
         success: false,
         message: "Unable to generate timetable",
       }
@@ -51,43 +50,42 @@ const configureTimetableAndGenerate = async (req, res) => {
         status: false, // Default status is "not in use"
       },
     });
-    console.log("Timetable Metadata:", savedTimetableMetadata);
-    
-
     return{
       success: true,
       message: "Timetable generated successfully",
       timetable: savedTimetableMetadata,
     }
   } catch (error) {
-    console.error("Error:", error.message);
-    return res.status(500).json({
+    return{
+      status: 500,
       success: false,
-      message: "Server error",
-      error: error.message,
-    });
+      message: "Unable to generate timetable",
+    }
   }
 };
 const publishTimeTable = async (req, res) => {
-  const { timetable } = req.body;
-  console.log(timetable);
+  const { timetable,id } = req.body;
+  console.log("timetable from body",timetable);
 
   if (!timetable) {
     return {
+      status: 400,
       success: false,
       message: "unable to get Timetable"
     }
   }
   try {
-    const resp = await publishTimetable(timetable)
-    if (resp.success) {
+    const publishStatus = await publishTimetable(timetable,id)
+    if (publishStatus.success) {
       return {
+        status:200,
         success: true,
-        message: "TimeTable Publised"
+        message: 'Timetable published successfully, and status updated to true',
       }
     }
     else {
       return {
+        status: 400,
         success: false,
         message: "unable to publish Timetable"
       }
@@ -96,8 +94,9 @@ const publishTimeTable = async (req, res) => {
   } catch (error) {
     console.log(error);
     return {
+      status: 500,
       success: false,
-      message: "unable to publish Timetable"
+      message: "unable to publish Timetable"+error.message
     }
 
   }

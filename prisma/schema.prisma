@@ -15,16 +15,17 @@ datasource db {
 }
 
 model User {
-  userid    String   @id
-  name      String?
-  email     String   @unique
-  mobile    String   @unique
-  password  String
-  isadmin   Boolean  @default(false)
-  role      String   @default("teacher")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // posts     Post[]
+  userid      String   @id
+  name        String?
+  email       String   @unique
+  mobile      String   @unique
+  password    String
+  isadmin     Boolean  @default(false)
+  role        String   @default("teacher")
+  department  String  @default("Management")
+  mytimetable Json?      // Storing the timetable as a JSON object
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // model Post {
@@ -47,12 +48,10 @@ model User {
 // }
 
 model timetable {
-  id           Int       @id @default(autoincrement())
-  name         String
-  userId       String
-  timetable    Json      // Storing the timetable as a JSON object
-  createdAt    DateTime  @default(now())
-  status       Boolean   @default(false) // Indicates if the timetable is currently in use
+  id        String      @id @default(uuid())
+  name      String
+  userId    String
+  timetable Json // Storing the timetable as a JSON object
+  createdAt DateTime @default(now())
+  status    Boolean  @default(false) // Indicates if the timetable is currently in use
 }
-
-

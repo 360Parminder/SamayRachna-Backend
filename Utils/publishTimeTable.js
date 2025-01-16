@@ -1,63 +1,68 @@
-const User = require('../Schema/UserSchema'); 
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
- const publishTimetable = async (timetable) => {
+const publishTimetable = async (timetable,id) => {
   try {
-    // Loop through the timetable by day
-    for (const dayLectures of timetable) {
-      // Loop through each lecture in a day
-      for (const lecture of dayLectures) {
-        const { day, lecture: lectureNumber, subject, userId } = lecture;
+    // const { id, timetable } = timetableData;
 
-        // Find the teacher by their userId
-        const teacher = await User.findOne({ userId });
+    // Iterate through the timetable by day
+    for (const dayLectures of timetable) {
+      for (const lecture of dayLectures) {
+        const { day, userId, lecture: lectureNumber, subject } = lecture;
+
+        // Find the teacher by their userid
+        const teacher = await prisma.user.findUnique({
+          where: { userid: userId },
+        });
 
         if (!teacher) {
           return {
             success: false,
-            message: `Teacher with userId ${userId} not found`
+            message: `Teacher with userid ${userId} not found`,
           };
         }
 
-        // Format the lecture object for the teacher's timetable
-        const formattedLecture = {
+        // Retrieve or initialize the teacher's timetable
+        const currentTimetable = teacher.mytimetable || [];
+
+        // Ensure the timetable has the correct number of days
+        while (currentTimetable.length < day) {
+          currentTimetable.push([]);
+        }
+
+        // Add the lecture details to the appropriate day
+        currentTimetable[day - 1].push({
           day,
           lecture: lectureNumber,
-          subject
-        };
-        // console.log(formattedLecture);
-        
+          subject,
+        });
 
-        // Initialize myTimetable if it doesn't exist
-        if (!teacher.myTimeTable) {
-          teacher.myTimeTable = [];
-        }
-
-        // Ensure we have the correct number of days in the timetable
-        if (!teacher.myTimeTable[day - 1]) {
-          teacher.myTimeTable[day - 1] = [];
-        }
-
-        // Add the formatted lecture to the correct day
-        teacher.myTimeTable[day - 1].push(formattedLecture);
-
-        // Save the updated teacher document
-        await teacher.save();
+        // Update the teacher's timetable in the database
+        await prisma.user.update({
+          where: { userid: userId },
+          data: { mytimetable: currentTimetable },
+        });
       }
     }
 
+    // Update the timetable's status to true
+    await prisma.timetable.update({
+      where: { id },
+      data: { status: true },
+    });
+
     return {
       success: true,
-      message: 'Timetable published successfully'
     };
   } catch (error) {
+    console.error(error);
     return {
       success: false,
-      message: `Error occurred: ${error.message}`
+      message: `Error occurred: ${error.message}`,
     };
   }
 };
 
 module.exports = {
-    publishTimetable
-}
-
+  publishTimetable,
+};
