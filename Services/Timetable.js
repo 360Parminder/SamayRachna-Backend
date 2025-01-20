@@ -16,6 +16,8 @@ const configureTimetableAndGenerate = async (req, res) => {
       teachers,
       timetableName, // Name of the timetable from the request body
     } = req.body;
+    console.log(req.body);
+    
 
     if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0 || !timetableName) {
       return{
@@ -33,7 +35,9 @@ const configureTimetableAndGenerate = async (req, res) => {
       maxLecturesPerWeekPerTeacher,
       totalTeachers
     );
-    if (!generatedTimetable) {
+  
+    
+    if (!generatedTimetable.success) {
       return{
         status: 500,
         success: false,
@@ -46,7 +50,7 @@ const configureTimetableAndGenerate = async (req, res) => {
       data: {
         name: timetableName,
         userId: user.userid,
-        timetable: generatedTimetable, // Save the timetable as a JSON object
+        timetable: generatedTimetable.timetable, // Save the timetable as a JSON object
         status: false, // Default status is "not in use"
       },
     });
@@ -59,15 +63,15 @@ const configureTimetableAndGenerate = async (req, res) => {
     return{
       status: 500,
       success: false,
-      message: "Unable to generate timetable",
+      message: error.message||"Unable to generate timetable",
     }
   }
 };
 const publishTimeTable = async (req, res) => {
-  const { timetable,id } = req.body;
-  console.log("timetable from body",timetable);
-
-  if (!timetable) {
+  const { id } = req.body;
+  console.log("id",id);
+  
+  if (!id) {
     return {
       status: 400,
       success: false,
@@ -75,12 +79,12 @@ const publishTimeTable = async (req, res) => {
     }
   }
   try {
-    const publishStatus = await publishTimetable(timetable,id)
+    const publishStatus = await publishTimetable(id)
     if (publishStatus.success) {
       return {
         status:200,
         success: true,
-        message: 'Timetable published successfully, and status updated to true',
+        message: 'Timetable published successfully',
       }
     }
     else {
@@ -96,14 +100,35 @@ const publishTimeTable = async (req, res) => {
     return {
       status: 500,
       success: false,
-      message: "unable to publish Timetable"+error.message
+      message: error.message||"Unable to publish timetable",
     }
 
   }
 
-}
+};
+const getAllTimetables = async (req, res) => {
+  try {
+    const timetables = await prisma.timetable.findMany({
+      where: {
+        userId: req.user.userid,
+      },
+    });
+    return {
+      status: 200,
+      success: true,
+      timetables,
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      success: false,
+      message: error.message||"Unable to get timetables",
+    }
+  }
+};
 
 module.exports = {
   configureTimetableAndGenerate,
-  publishTimeTable
+  publishTimeTable,
+  getAllTimetables,
 }

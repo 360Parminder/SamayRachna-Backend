@@ -1,4 +1,4 @@
-const { configureTimetableAndGenerate, publishTimeTable } = require("../Services/Timetable")
+const { configureTimetableAndGenerate, publishTimeTable, getAllTimetables } = require("../Services/Timetable")
 
 
 
@@ -22,9 +22,19 @@ const PublishTimetable = async(req,res)=>{
      else {
         res.status(400).json(data);
      }
-}
+};
+const GetAllTimetables = async (req, res) => {
+ const data = await getAllTimetables(req,res);
+ if(data.success){
+     res.status(data.status).json(data);
+ }
+   else{
+      res.status(data.status).json(data);
+   }
+};
 
 module.exports={
     TimeTable,
-    PublishTimetable
+    PublishTimetable,
+      GetAllTimetables
 }

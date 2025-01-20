@@ -1,24 +1,34 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const publishTimetable = async (timetable,id) => {
+const publishTimetable = async (id) => {
   try {
-    // const { id, timetable } = timetableData;
+    const timetable = await prisma.timetable.findUnique({
+      where: { id },
+    });
+    console.log("timetable", timetable.timetable);
+
+    if (!timetable) {
+      return {
+        success: false,
+        message: `Timetable with id ${id} not found`,
+      };
+    }
 
     // Iterate through the timetable by day
-    for (const dayLectures of timetable) {
+    for (const dayLectures of timetable.timetable) {
       for (const lecture of dayLectures) {
-        const { day, userId, lecture: lectureNumber, subject } = lecture;
+        const { day, userid, lecture: lectureNumber, subject } = lecture;
 
         // Find the teacher by their userid
         const teacher = await prisma.user.findUnique({
-          where: { userid: userId },
+          where: { userid: userid },
         });
 
         if (!teacher) {
           return {
             success: false,
-            message: `Teacher with userid ${userId} not found`,
+            message: `Teacher with userid ${userid} not found`,
           };
         }
 
@@ -39,11 +49,19 @@ const publishTimetable = async (timetable,id) => {
 
         // Update the teacher's timetable in the database
         await prisma.user.update({
-          where: { userid: userId },
+          where: { userid: userid },
           data: { mytimetable: currentTimetable },
         });
       }
     }
+
+    // Set the status of all other timetables to false
+    await prisma.timetable.updateMany({
+      where: {
+        id: { not: id },
+      },
+      data: { status: false },
+    });
 
     // Update the timetable's status to true
     await prisma.timetable.update({

@@ -39,28 +39,25 @@ const chatSession = model.startChat({
 
 
 // };
-function generateTimetable(workingDays,
-    lecturesPerDay,
-    teachers,
-    maxLecturesPerDayPerTeacher,
-    maxLecturesPerWeekPerTeacher,
-    totalTeachers) {
+function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPerDayPerTeacher, maxLecturesPerWeekPerTeacher, totalTeachers) {
+
 
     try {
         // Check if teachers is an array
         if (!Array.isArray(teachers)) {
-            throw new Error("Expected 'teachers' to be an array");
+            return {
+                status: 400,
+                message: "Teachers must be an array",
+            }
         }
-
         // Initialize an empty timetable
         const timetable = [];
         for (let i = 0; i < workingDays; i++) {
             timetable.push(Array(lecturesPerDay).fill(null)); // Each day has 'lecturesPerDay' slots
         }
-
         // Track the number of lectures assigned to each teacher
         const teacherLectureCount = teachers.reduce((acc, teacher) => {
-            acc[teacher.teacherName] = { daily: 0, weekly: 0 };
+            acc[teacher.userid] = { daily: 0, weekly: 0 };
             return acc;
         }, {});
 
@@ -68,32 +65,30 @@ function generateTimetable(workingDays,
         for (let day = 0; day < workingDays; day++) {
             for (let lecture = 0; lecture < lecturesPerDay; lecture++) {
                 let assigned = false;
-
                 while (!assigned) {
+
                     const randomTeacherIndex = Math.floor(Math.random() * totalTeachers);
                     const teacher = teachers[randomTeacherIndex];
 
                     // Check if the teacher has remaining lectures for the day and week
-                    if (teacherLectureCount[teacher.teacherName].daily < maxLecturesPerDayPerTeacher &&
-                        teacherLectureCount[teacher.teacherName].weekly < maxLecturesPerWeekPerTeacher) {
+
+                    if (teacherLectureCount[teacher.userid].daily < maxLecturesPerDayPerTeacher && teacherLectureCount[teacher.userid].weekly < maxLecturesPerWeekPerTeacher) {
 
                         // Assign the teacher's subject randomly for the lecture
                         const subjectIndex = Math.floor(Math.random() * teacher.subjects.length);
                         const subject = teacher.subjects[subjectIndex];
-
                         // Assign the subject to the timetable
                         timetable[day][lecture] = {
                             day: day + 1,
                             lecture: lecture + 1,
                             teacher: teacher.teacherName,
                             subject: subject,
-                            userId:teacher.userId
+                            userid: teacher.userid
                         };
 
                         // Update the teacher's lecture count
-                        teacherLectureCount[teacher.teacherName].daily += 1;
-                        teacherLectureCount[teacher.teacherName].weekly += 1;
-
+                        teacherLectureCount[teacher.userid].daily += 1;
+                        teacherLectureCount[teacher.userid].weekly += 1;
                         assigned = true;
                     }
                 }
@@ -104,11 +99,19 @@ function generateTimetable(workingDays,
                 teacherLectureCount[teacher].daily = 0;
             });
         }
-
-        return timetable;
+        return {
+            status: 200,
+            message: "Timetable generated successfully",
+            success: true,
+            timetable,
+        };
     } catch (error) {
-    return error;
-}
+        return {
+            status: 500,
+            message: "Unable to generate timetable",
+            success: false,
+        }
+    }
 }
 module.exports = {
     generateTimetable

@@ -116,6 +116,9 @@ const userProfile = async (req, res) => {
         email: true,
         role: true,
         mobile: true,
+        mySubjects: true,
+        department: true,
+        mytimetable: true,
       },
     });
 
