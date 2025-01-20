@@ -15,6 +15,7 @@ const configureTimetableAndGenerate = async (req, res) => {
       maxLecturesPerWeekPerTeacher,
       teachers,
       timetableName, // Name of the timetable from the request body
+      timetableId
     } = req.body;
     console.log(req.body);
     
@@ -33,8 +34,10 @@ const configureTimetableAndGenerate = async (req, res) => {
       teachers,
       maxLecturesPerDayPerTeacher,
       maxLecturesPerWeekPerTeacher,
-      totalTeachers
+      totalTeachers,
+      timetableId
     );
+  console.log("generatedTimetable",generatedTimetable);
   
     
     if (!generatedTimetable.success) {

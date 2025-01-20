@@ -1,5 +1,6 @@
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { prisma } = require("../db/connectDB");
 
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -39,9 +40,7 @@ const chatSession = model.startChat({
 
 
 // };
-function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPerDayPerTeacher, maxLecturesPerWeekPerTeacher, totalTeachers) {
-
-
+async function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPerDayPerTeacher, maxLecturesPerWeekPerTeacher, totalTeachers, timetableId) {
     try {
         // Check if teachers is an array
         if (!Array.isArray(teachers)) {
@@ -50,11 +49,24 @@ function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPer
                 message: "Teachers must be an array",
             }
         }
+
+        // Fetch existing timetable from DB using Prisma
+        const existingTimetable = await prisma.timetable.findUnique({
+            where: { id: timetableId },
+        });
+        if (!existingTimetable) {
+            return {
+                status: 404,
+                message: "Timetable not found",
+            }
+        }
+
         // Initialize an empty timetable
         const timetable = [];
         for (let i = 0; i < workingDays; i++) {
             timetable.push(Array(lecturesPerDay).fill(null)); // Each day has 'lecturesPerDay' slots
         }
+
         // Track the number of lectures assigned to each teacher
         const teacherLectureCount = teachers.reduce((acc, teacher) => {
             acc[teacher.userid] = { daily: 0, weekly: 0 };
@@ -66,13 +78,16 @@ function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPer
             for (let lecture = 0; lecture < lecturesPerDay; lecture++) {
                 let assigned = false;
                 while (!assigned) {
-
                     const randomTeacherIndex = Math.floor(Math.random() * totalTeachers);
                     const teacher = teachers[randomTeacherIndex];
 
                     // Check if the teacher has remaining lectures for the day and week
-
                     if (teacherLectureCount[teacher.userid].daily < maxLecturesPerDayPerTeacher && teacherLectureCount[teacher.userid].weekly < maxLecturesPerWeekPerTeacher) {
+                        // Check for clashes with existing timetable
+                        const existingLecture = existingTimetable.timetable[day][lecture];
+                        if (existingLecture && existingLecture.userid === teacher.userid) {
+                            continue; // Skip if there's a clash
+                        }
 
                         // Assign the teacher's subject randomly for the lecture
                         const subjectIndex = Math.floor(Math.random() * teacher.subjects.length);
@@ -99,6 +114,13 @@ function generateTimetable(workingDays, lecturesPerDay, teachers, maxLecturesPer
                 teacherLectureCount[teacher].daily = 0;
             });
         }
+
+        // Save the new timetable to the DB using Prisma
+        await prisma.timetable.update({
+            where: { id: timetableId },
+            data: { timetable },
+        });
+
         return {
             status: 200,
             message: "Timetable generated successfully",

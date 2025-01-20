@@ -6,7 +6,6 @@ const publishTimetable = async (id) => {
     const timetable = await prisma.timetable.findUnique({
       where: { id },
     });
-    console.log("timetable", timetable.timetable);
 
     if (!timetable) {
       return {
