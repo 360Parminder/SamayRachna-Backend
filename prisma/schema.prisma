@@ -11,10 +11,13 @@ datasource db {
 
 model User {
   userid      String   @id
-  name        String?
+  profilepic  String? @default("https://res.cloudinary.com/dvo4tvvgb/image/upload/v1737475056/Profile/i8dmjx8tps4wghatmgt3.jpg")
+  name        String
   email       String   @unique
   mobile      String   @unique
+  dob         DateTime? 
   password    String
+  gender      String?
   isadmin     Boolean  @default(false)
   role        String   @default("teacher")
   department  String  @default("Management")
@@ -22,6 +25,13 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   mySubjects  String[] @default([])
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  pincode     String?
+  status      Boolean  @default(true)
+  
 }
 
 model timetable {

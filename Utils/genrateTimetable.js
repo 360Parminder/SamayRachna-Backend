@@ -1,41 +1,5 @@
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { prisma } = require("../db/connectDB");
-
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-});
-
-const generationConfig = {
-    temperature: 2,
-    topP: 0.95,
-    topK: 64,
-    maxOutputTokens: 8192,
-    responseMimeType: "application/json",
-};
-
-
-const chatSession = model.startChat({
-    generationConfig,
-
-});
-
-
-//  const generateTimetable = async (totalTeachers,workingDays, lecturesPerDay, teachers, maxLecturesPerDayPerTeacher, maxLecturesPerWeekPerTeacher) => {
-
-//   const result = await chatSession.sendMessage(
-//    `Generate a detailed school timetable for ${workingDays} working days (excluding Sunday), ${lecturesPerDay} lectures per day, with ${totalTeachers} teachers, each limited to ${maxLecturesPerDayPerTeacher} lectures per day and ${maxLecturesPerWeekPerTeacher} lectures per week. Use the following teachers and subjects: ${teachers}, ensuring a balanced subject distribution across all days, while adhering to the constraints for each teacher.` );
-
-//   // console.log(result.response.text());
-//   const data = JSON.parse(result.response.text());
-//   console.log(result.response.text());
-
-//    return data.timetable;
-
-
 
 
 
