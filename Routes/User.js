@@ -3,8 +3,22 @@ const express = require("express");
 const router = express.Router();
 const { RegisterUser, LoginUser, UserProfile, GetAllUser, ChangePassword } = require("../Controllers/User");
 const user_auth = require("../Middleware/userAuth");
+const multer = require("multer");
 
-router.post("/register", RegisterUser);
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        console.log(file);
+        console.log("req.file",req);
+        
+        cb(null, "uploads/"); // Save files in the 'uploads' folder
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname); // Unique filename
+    },
+});
+const upload = multer({ storage });
+
+router.post("/register",upload.single('profilePic'), RegisterUser);
 router.post("/login", LoginUser);
 router.get("/profile",user_auth, UserProfile);
 router.get("/alluser",user_auth, GetAllUser);

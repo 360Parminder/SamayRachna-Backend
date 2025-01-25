@@ -8,18 +8,43 @@ require('dotenv').config();
 const port = process.env.PORT || 9000;
 const client = require('./db/databasepg');
 const { connectDB } = require('./db/connectDB');
+const cors = require('cors');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://quickcart-store.vercel.app",
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log('Requested Origin:', origin);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+// Enable CORS
+app.use(cors(corsOptions));
+
+// CORS preflight
+app.options('*', cors(corsOptions))
 
 app.use('/', require('./Routes/Timetable'));
 app.use('/', require('./Routes/User'));
 app.get('/root', (req, res) => {
   res.send('Hello World!');
 });
-
-// connectDB();
 
 connectDB();
 app.listen(port, () => {

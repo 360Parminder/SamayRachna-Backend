@@ -11,7 +11,7 @@ datasource db {
 
 model User {
   userid      String   @id
-  profilepic  String? @default("https://res.cloudinary.com/dvo4tvvgb/image/upload/v1737475056/Profile/i8dmjx8tps4wghatmgt3.jpg")
+  profilePic  String @default("https://res.cloudinary.com/dvo4tvvgb/image/upload/v1737475056/Profile/i8dmjx8tps4wghatmgt3.jpg")
   name        String
   email       String   @unique
   mobile      String   @unique
@@ -31,7 +31,7 @@ model User {
   country     String?
   pincode     String?
   status      Boolean  @default(true)
-  
+  myClasses   String[] @default([])
 }
 
 model timetable {

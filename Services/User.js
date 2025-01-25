@@ -7,11 +7,18 @@ const generateTokens = require("../Utils/genrateTokens");
 const client = require('../db/databasepg');
 const { query } = require("express");
 const { prisma } = require("../db/connectDB");
+const { uploadToCloudinary, uploadImage } = require("../Utils/cloudinary");
 
 // Register a new user
 const registerUser = async (req, res) => {
-  const { name, email, password, role, mobile, department, mySubjects, gender, profilepic } = req.body;
+  const { name, email, password, role, mobile, department, mySubjects, gender } = req.body;
+  console.log(req.body);
+  
+const file = req.file;
+console.log(file);
 
+  // console.log(req.body);
+  
   try {
     // Check if all required fields are provided
     if (!name || !email || !password || !mobile) {
@@ -34,6 +41,9 @@ const registerUser = async (req, res) => {
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+ const { path: filePath, originalname: fileName } = req.file;
+    const imagePath = await uploadImage(filePath, fileName);
+
 
     // Create a new user
     const user = await prisma.user.create({
@@ -48,7 +58,7 @@ const registerUser = async (req, res) => {
         department: department || "Management", // Default to "Management" if department is not provided
         mySubjects: mySubjects,
         gender: gender,
-        profilepic: profilepic,
+        profilepic: imagePath.url,
       },
     });
 
@@ -120,7 +130,7 @@ const userProfile = async (req, res) => {
         mySubjects: true,
         department: true,
         mytimetable: true,
-        profilepic: true,
+        profilePic: true,
         gender: true,
       },
     });
@@ -177,10 +187,6 @@ const getallUser = async (req, res) => {
   }
 };
 const changePassword = async(req, res) => {
-  console.log(req.user);
-  console.log(req.body);
-  
-  
   const { email} = req.user;
   const { oldPassword, newPassword } = req.body;
   try {
