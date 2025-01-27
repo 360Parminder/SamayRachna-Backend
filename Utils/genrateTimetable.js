@@ -13,23 +13,39 @@ async function generateTimetable(workingDays, lecturesPerDay, teachers, maxLectu
                 message: "Teachers must be an array",
             }
         }
-
+        let existingTimetable;
         // Fetch existing timetable from DB using Prisma
-        const existingTimetable = await prisma.timetable.findUnique({
-            where: { id: timetableId },
-        });
-        if (!existingTimetable) {
-            return {
-                status: 404,
-                message: "Timetable not found",
-            }
+        if (timetableId) {
+            existingTimetable = await prisma.timetable.findUnique({
+                where: {
+                    id: timetableId,
+                },
+            });
         }
+
+        if (!existingTimetable) {
+            existingTimetable = {
+                timetable: [
+                    {
+                        day: 1,
+                        lecture: 1,
+                        teacher: "teacherName",
+                        subject: "subject",
+                        userid: "userid"
+
+                    }
+
+                ],
+            };
+        }
+
 
         // Initialize an empty timetable
         const timetable = [];
         for (let i = 0; i < workingDays; i++) {
             timetable.push(Array(lecturesPerDay).fill(null)); // Each day has 'lecturesPerDay' slots
         }
+
 
         // Track the number of lectures assigned to each teacher
         const teacherLectureCount = teachers.reduce((acc, teacher) => {
@@ -47,12 +63,13 @@ async function generateTimetable(workingDays, lecturesPerDay, teachers, maxLectu
 
                     // Check if the teacher has remaining lectures for the day and week
                     if (teacherLectureCount[teacher.userid].daily < maxLecturesPerDayPerTeacher && teacherLectureCount[teacher.userid].weekly < maxLecturesPerWeekPerTeacher) {
+
                         // Check for clashes with existing timetable
                         const existingLecture = existingTimetable.timetable[day][lecture];
+
                         if (existingLecture && existingLecture.userid === teacher.userid) {
                             continue; // Skip if there's a clash
                         }
-
                         // Assign the teacher's subject randomly for the lecture
                         const subjectIndex = Math.floor(Math.random() * teacher.subjects.length);
                         const subject = teacher.subjects[subjectIndex];
@@ -78,12 +95,8 @@ async function generateTimetable(workingDays, lecturesPerDay, teachers, maxLectu
                 teacherLectureCount[teacher].daily = 0;
             });
         }
+        console.log("timetable", timetable);
 
-        // Save the new timetable to the DB using Prisma
-        await prisma.timetable.update({
-            where: { id: timetableId },
-            data: { timetable },
-        });
 
         return {
             status: 200,
@@ -92,6 +105,8 @@ async function generateTimetable(workingDays, lecturesPerDay, teachers, maxLectu
             timetable,
         };
     } catch (error) {
+        console.log(error.message);
+
         return {
             status: 500,
             message: "Unable to generate timetable",

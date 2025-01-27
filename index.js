@@ -17,7 +17,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://quickcart-store.vercel.app",
+  "https://samay-rachna-admin.vercel.app",
 ];
 
 const corsOptions = {

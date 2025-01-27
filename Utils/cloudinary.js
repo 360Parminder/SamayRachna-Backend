@@ -36,7 +36,7 @@ cloudinary.config({
     try {
         const result = await cloudinary.uploader.upload(filePath, {
             resource_type: 'raw', // Use 'raw' for non-media files like PDFs
-            folder: 'bills',      // Optional: Specify a folder in Cloudinary
+            folder: 'Timetable',      // Optional: Specify a folder in Cloudinary
             flags: 'attachment',  // Optional: Add the 'attachment' flag for content disposition
         });
         // console.log('Upload Successful:', result);

@@ -2,6 +2,8 @@ const { generateTimetable } = require("../Utils/genrateTimetable");
 const User = require("../Schema/UserSchema");
 const { publishTimetable } = require("../Utils/publishTimeTable");
 const { prisma } = require("../db/connectDB");
+const { generatePDF } = require("../Utils/generatepdf");
+const { uploadToCloudinary } = require("../Utils/cloudinary");
 
 
 const configureTimetableAndGenerate = async (req, res) => {
@@ -129,9 +131,62 @@ const getAllTimetables = async (req, res) => {
     }
   }
 };
+const downloadTimetable = async (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return {
+      status: 400,
+      success: false,
+      message: "Please provide a timetable ID",
+    };
+  }
+  try {
+    const timetable = await prisma.timetable.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!timetable) {
+      return {
+        status: 404,
+        success: false,
+        message: "Timetable not found",
+      };
+    }
+    const {filePath }= generatePDF(timetable);
+    if (!filePath) {
+      return {
+        status: 500,
+        success: false,
+        message: "Unable to generate PDF",
+      };
+      
+    }
+    const downloadUrl = await uploadToCloudinary(filePath);
+    if (!downloadUrl) {
+      return {
+        status: 500,
+        success: false,
+        message: "Unable to upload to Cloudinary",
+      };
+    }
+    return {
+      status: 200,
+      success: true,
+      downloadUrl,
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      success: false,
+      message: error.message,
+    };
+  }
+}
 
 module.exports = {
   configureTimetableAndGenerate,
   publishTimeTable,
   getAllTimetables,
+  downloadTimetable
 }
