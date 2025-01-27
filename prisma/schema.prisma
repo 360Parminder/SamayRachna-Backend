@@ -25,7 +25,7 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   mySubjects  String[] @default([])
-  address     String?
+  street     String?
   city        String?
   state       String?
   country     String?

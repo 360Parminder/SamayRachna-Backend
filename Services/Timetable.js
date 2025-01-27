@@ -153,7 +153,7 @@ const downloadTimetable = async (req, res) => {
         message: "Timetable not found",
       };
     }
-    const {filePath }= generatePDF(timetable);
+    const {filePath }= await generatePDF(timetable);
     if (!filePath) {
       return {
         status: 500,
