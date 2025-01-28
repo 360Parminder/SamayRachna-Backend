@@ -58,7 +58,7 @@ console.log(file);
         department: department || "Management", // Default to "Management" if department is not provided
         mySubjects: mySubjects,
         gender: gender,
-        profilepic: imagePath.url,
+        profilePic: imagePath.url,
       },
     });
 
@@ -132,8 +132,17 @@ const userProfile = async (req, res) => {
         mytimetable: true,
         profilePic: true,
         gender: true,
+        street: true,
+        city: true,
+        state: true,
+        country: true,
+        pincode: true,
       },
     });
+    const timetable = await prisma.teacherTimetable.findFirst({
+      where: { userId: userId },
+    })
+
 
     if (!user) {
       return {
@@ -149,6 +158,7 @@ const userProfile = async (req, res) => {
       success: true,
       message: "User profile fetched",
       user,
+      timetable: timetable?.timetable,
     }
   } catch (error) {
     console.error("Profile Error:", error);
@@ -171,6 +181,9 @@ const getallUser = async (req, res) => {
         role: true,
         department: true,
         mySubjects: true,
+        mobile: true,
+        email: true,
+        myClasses: true,
       }
     });
     const totalUsers = await prisma.user.count();

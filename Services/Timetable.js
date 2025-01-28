@@ -21,6 +21,7 @@ const configureTimetableAndGenerate = async (req, res) => {
     } = req.body;
     console.log(req.body);
     
+    
 
     if (!workingDays || !lecturesPerDay || !teachers || teachers.length === 0 || !timetableName) {
       return{
@@ -29,18 +30,16 @@ const configureTimetableAndGenerate = async (req, res) => {
         message: "Please provide all required fields",
       }
     }
-
     const generatedTimetable = await generateTimetable(
       workingDays,
       lecturesPerDay,
+      totalTeachers,
       teachers,
       maxLecturesPerDayPerTeacher,
       maxLecturesPerWeekPerTeacher,
       totalTeachers,
       timetableId
     );
-  console.log("generatedTimetable",generatedTimetable);
-  
     
     if (!generatedTimetable.success) {
       return{
@@ -74,8 +73,6 @@ const configureTimetableAndGenerate = async (req, res) => {
 };
 const publishTimeTable = async (req, res) => {
   const { id } = req.body;
-  console.log("id",id);
-  
   if (!id) {
     return {
       status: 400,
