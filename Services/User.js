@@ -136,7 +136,11 @@ const userProfile = async (req, res) => {
         state: true,
         country: true,
         pincode: true,
-        mytimetable: true,
+        mytimetable: { // Fetch related teacherTimetable
+          select: {
+            timetable: true,
+          },
+        },
       },
     });
     const timetable = await prisma.teacherTimetable.findFirst({
