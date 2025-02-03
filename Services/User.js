@@ -84,9 +84,6 @@ const loginUser = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email: email },
-      include: {
-        mytimetable: true, 
-      },
     });
     if (!user) {
       return { status: 400, message: "User not found" };
