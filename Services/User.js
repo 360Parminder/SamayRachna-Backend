@@ -84,6 +84,7 @@ const loginUser = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email: email },
+
     });
     if (!user) {
       return { status: 400, message: "User not found" };
@@ -107,69 +108,51 @@ const loginUser = async (req, res) => {
 
 const userProfile = async (req, res) => {
   try {
-    // `req.user` should be populated by an authentication middleware
-    const userId = req.user?.userid; // Adjust according to how the user ID is stored
-
+    const userId = req.user?.userid;
     if (!userId) {
       return {
         success: false,
         status: 400,
         message: "User not found",
-      }
+      };
     }
 
-    // Fetch user details from the database
+    // Fetch user and timetable data
     const user = await prisma.user.findUnique({
       where: { userid: userId },
       include: {
-        mytimetable: true,
-      },
-      select: {
-        userid: true,
-        name: true,
-        email: true,
-        role: true,
-        mobile: true,
-        mySubjects: true,
-        department: true,
-        profilePic: true,
-        gender: true,
-        street: true,
-        city: true,
-        state: true,
-        country: true,
-        pincode: true,
+        mytimetable: {
+          select: {
+            timetable: true, // Fetch only the timetable JSON
+          },
+        },
       },
     });
-    const timetable = await prisma.teacherTimetable.findFirst({
-      where: { userId: userId },
-    })
-
 
     if (!user) {
       return {
         success: false,
         status: 400,
         message: "User not found",
-      }
+      };
     }
 
-    // Return user profile
     return {
       status: 200,
       success: true,
       message: "User profile fetched",
       user,
-      timetable: timetable?.timetable,
-    }
+      timetable: user.mytimetable.map((t) => t.timetable), // Extract timetable JSONs
+    };
   } catch (error) {
     console.error("Profile Error:", error);
     return {
       status: 400,
       message: error.message,
-    }
+    };
   }
 };
+
 
 const getallUser = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
