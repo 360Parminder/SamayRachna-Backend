@@ -13,12 +13,12 @@ const { uploadToCloudinary, uploadImage } = require("../Utils/cloudinary");
 const registerUser = async (req, res) => {
   const { name, email, password, role, mobile, department, mySubjects, gender } = req.body;
   console.log(req.body);
-  
-const file = req.file;
-console.log(file);
+
+  const file = req.file;
+  console.log(file);
 
   // console.log(req.body);
-  
+
   try {
     // Check if all required fields are provided
     if (!name || !email || !password || !mobile) {
@@ -41,7 +41,7 @@ console.log(file);
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
- const { path: filePath, originalname: fileName } = req.file;
+    const { path: filePath, originalname: fileName } = req.file;
     const imagePath = await uploadImage(filePath, fileName);
 
 
@@ -121,31 +121,11 @@ const userProfile = async (req, res) => {
     // Fetch user details from the database
     const userdata = await prisma.user.findUnique({
       where: { userid: userId },
-      select: {
-        userid: true,
-        name: true,
-        email: true,
-        role: true,
-        mobile: true,
-        mySubjects: true,
-        department: true,
-        profilePic: true,
-        gender: true,
-        street: true,
-        city: true,
-        state: true,
-        country: true,
-        pincode: true,
-        mytimetable: { // Fetch related teacherTimetable
-          select: {
-            timetable: true,
-          },
-        },
-      },
+        include:{
+          mytimetable: true,
+        }
     });
-    const timetable = await prisma.teacherTimetable.findFirst({
-      where: { userId: userId },
-    })
+    
 
 
     if (!userdata) {
@@ -162,7 +142,6 @@ const userProfile = async (req, res) => {
       success: true,
       message: "User profile fetched",
       userdata,
-      timetable: timetable?.timetable,
     }
   } catch (error) {
     console.error("Profile Error:", error);
@@ -203,8 +182,8 @@ const getallUser = async (req, res) => {
     return { status: 400, message: error.message };
   }
 };
-const changePassword = async(req, res) => {
-  const { email} = req.user;
+const changePassword = async (req, res) => {
+  const { email } = req.user;
   const { oldPassword, newPassword } = req.body;
   try {
     const user = await prisma.user.findUnique({
