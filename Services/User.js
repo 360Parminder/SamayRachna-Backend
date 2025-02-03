@@ -119,7 +119,7 @@ const userProfile = async (req, res) => {
     }
 
     // Fetch user details from the database
-    const user = await prisma.user.findUnique({
+    const userdata = await prisma.user.findUnique({
       where: { userid: userId },
       select: {
         userid: true,
@@ -144,7 +144,7 @@ const userProfile = async (req, res) => {
     })
 
 
-    if (!user) {
+    if (!userdata) {
       return {
         success: false,
         status: 400,
@@ -157,7 +157,7 @@ const userProfile = async (req, res) => {
       status: 200,
       success: true,
       message: "User profile fetched",
-      user,
+      userdata,
       timetable: timetable?.timetable,
     }
   } catch (error) {
