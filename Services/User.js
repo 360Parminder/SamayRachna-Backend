@@ -121,6 +121,9 @@ const userProfile = async (req, res) => {
     // Fetch user details from the database
     const user = await prisma.user.findUnique({
       where: { userid: userId },
+      include: {
+        mytimetable: true,
+      },
       select: {
         userid: true,
         name: true,
@@ -129,7 +132,6 @@ const userProfile = async (req, res) => {
         mobile: true,
         mySubjects: true,
         department: true,
-        mytimetable: true,
         profilePic: true,
         gender: true,
         street: true,

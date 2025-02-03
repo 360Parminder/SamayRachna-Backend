@@ -7,9 +7,8 @@ const multer = require("multer");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        console.log(file);
-        console.log("req.file",req);
-        
+        console.log("file from router",file);
+        console.log("req.file from router",req);
         cb(null, "uploads/"); // Save files in the 'uploads' folder
     },
     filename: (req, file, cb) => {
