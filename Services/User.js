@@ -107,51 +107,67 @@ const loginUser = async (req, res) => {
 
 const userProfile = async (req, res) => {
   try {
-    const userId = req.user?.userid;
+    // `req.user` should be populated by an authentication middleware
+    const userId = req.user?.userid; // Adjust according to how the user ID is stored
+
     if (!userId) {
       return {
         success: false,
         status: 400,
         message: "User not found",
-      };
+      }
     }
 
-    // Fetch user and timetable data
+    // Fetch user details from the database
     const user = await prisma.user.findUnique({
       where: { userid: userId },
-      include: {
-        mytimetable: {
-          select: {
-            timetable: true, // Fetch only the timetable JSON
-          },
-        },
+      select: {
+        userid: true,
+        name: true,
+        email: true,
+        role: true,
+        mobile: true,
+        mySubjects: true,
+        department: true,
+        profilePic: true,
+        gender: true,
+        street: true,
+        city: true,
+        state: true,
+        country: true,
+        pincode: true,
+        mytimetable: true,
       },
     });
+    const timetable = await prisma.teacherTimetable.findFirst({
+      where: { userId: userId },
+    })
+
 
     if (!user) {
       return {
         success: false,
         status: 400,
         message: "User not found",
-      };
+      }
     }
 
+    // Return user profile
     return {
       status: 200,
       success: true,
       message: "User profile fetched",
       user,
-      timetable: user.mytimetable.map((t) => t.timetable), // Extract timetable JSONs
-    };
+      timetable: timetable?.timetable,
+    }
   } catch (error) {
     console.error("Profile Error:", error);
     return {
       status: 400,
       message: error.message,
-    };
+    }
   }
 };
-
 
 const getallUser = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
