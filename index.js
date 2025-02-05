@@ -42,8 +42,8 @@ app.options('*', cors(corsOptions))
 
 app.use('/', require('./Routes/Timetable'));
 app.use('/', require('./Routes/User'));
-app.get('/root', (req, res) => {
-  res.send('Hello World!');
+app.get('/Status', (req, res) => {
+  res.send('Samay Rachna Backend Server is running');
 });
 
 connectDB();
